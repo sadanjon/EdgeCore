@@ -1,20 +1,25 @@
 #include "edgeDef.h"
 #include "thread.h"
+#include "logger.h"
+#include "error.h"
 
 namespace edge {
 
-#ifdef WIN32
+RenderingContext rc = {};
 
-HINSTANCE g_hInstance;
-HDC  g_hDC;
-HGLRC g_hGLRC;
-Sint32 g_nCmdShow;
+#ifndef NDEBUG
+Logger loggerErr("err.txt", true);
+#endif
+
+#ifdef WIN32
 
 #define CMDLINE_LENGTH 1024
 void createArgv(int &argc, char **&argv) {	
     char *cmdLine = new char[CMDLINE_LENGTH];
 	wchar_t *wCmdl = GetCommandLineW();    
-	wcstombs(cmdLine, wCmdl, wcslen(wCmdl));
+    if (wcstombs(cmdLine, wCmdl, wcslen(wCmdl)) < 0) {
+        throw Error(ERRID_ERRNO);
+    }
 
     argv = new char*[CMDLINE_LENGTH];
 	argv[0] = strtok(cmdLine, " \t");

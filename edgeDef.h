@@ -10,6 +10,11 @@
 
 namespace edge {
 
+#ifndef NDEBUG
+class Logger;
+extern Logger loggerErr;
+#endif
+
 
 #ifdef WIN32
 typedef INT8 Sint8;
@@ -28,9 +33,14 @@ typedef CONDITION_VARIABLE CVHandle;
 
 #define THREAD DWORD WINAPI
 
-extern HINSTANCE g_hInstance;
-extern HDC  g_hDC;
-extern HGLRC g_hGLRC;
+struct RenderingContext {
+    HINSTANCE hInstance;
+    int nCmdShow;
+    HWND hWnd;
+    HDC hDC;
+    HGLRC hRC;
+};
+extern RenderingContext rc;
 
 extern Sint32 g_nCmdShow;
 
@@ -38,9 +48,16 @@ extern Sint32 g_nCmdShow;
 	int argc;\
     char **argv;\
 	edge::createArgv(argc, argv);\
-    edge::g_hInstance = hInstance;\
-    edge::g_nCmdShow = nCmdShow;\
-	int retValue =  edge::__main(argc, argv);\
+    edge::rc.hInstance = hInstance;\
+    edge::rc.nCmdShow = nCmdShow;\
+    int retValue;\
+    try {\
+	    retValue =  edge::__main(argc, argv);\
+    } catch (edge::Error &e) {\
+        EG_DBG("Exception caught: %s\n",e.getMessage());\
+    }\
+    edge::EventQueue::kill();\
+    edge::EventDispatcher::kill();\
 	delete[] argv;\
 	return retValue;\
 } int edge::__main(int argc, char **argv)

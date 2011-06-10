@@ -1,19 +1,22 @@
 #include "ConditionVariable.h"
+#include "error.h"
 
 namespace edge {
 
 #ifdef WIN32
 
-ConditionVariable::ConditionVariable(void) {    
-    // no initialization required in windows   
+ConditionVariable::ConditionVariable(void) {        
+    InitializeConditionVariable(&m_handle);
 }
 
 ConditionVariable::~ConditionVariable(void) {
-    // and no freeing
+    // no freeing nessecery in windows
 }
 
 void ConditionVariable::wait(Mutex &m) {
-    SleepConditionVariableCS(&m_handle, &m.m_handle, INFINITE);    
+    if (!SleepConditionVariableCS(&m_handle, &m.m_handle, INFINITE)) {
+        throw Error(ERRID_CV, "Thread failed to sleep on CV");
+    }
 }
 
 void ConditionVariable::signal() {

@@ -42,7 +42,7 @@ private:
 
     StlEventQueue m_queue;
     Mutex m_mutex;
-    ConditionVariable m_cv;
+    ConditionVariable m_cvQueueIsNotEmpty;
 
     friend bool getEvent(Event &e, bool block);
 };

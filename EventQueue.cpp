@@ -15,10 +15,10 @@ EventQueue::~EventQueue() {
 
 void EventQueue::enqueue(Event e) {
     m_mutex.lock();
-    if (m_queue.size() == 0)
-        m_cv.signalAll();
-
+    
+    m_cvQueueIsNotEmpty.signal();
     m_queue.push_front(e);
+
     m_mutex.unlock();
 }
 
@@ -46,9 +46,10 @@ Event EventQueue::dequeue() {
 bool getEvent(Event &e, bool block) {
     static Mutex queueMutex;
     static EventQueue *eq = EventQueue::getInstance();
+    queueMutex.lock();
 
-    if (block && eq->size() == 0) {
-        eq->m_cv.wait(queueMutex);        
+    if (block && eq->size() == 0) {        
+        eq->m_cvQueueIsNotEmpty.wait(queueMutex);                
         e = eq->dequeue();   
         return true;
     } 

@@ -1,4 +1,5 @@
 #include "Thread.h"
+#include "error.h"
 
 namespace edge {
 
@@ -22,6 +23,9 @@ Thread::~Thread(void) {
 
 void Thread::start(void *argument) {
     m_handle = CreateThread(NULL, 0, m_threadProc, argument, 0, NULL);
+    if (m_handle == NULL) {
+        throw Error(ERRID_THREAD, "could not create thread");
+    }
     m_started = true;
 }
 

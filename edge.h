@@ -9,6 +9,7 @@
 #include "mutex.h"
 #include "events.h"
 #include "eventQueue.h"
+#include "eventDispatcher.h"
 
 
 namespace eg = edge;
