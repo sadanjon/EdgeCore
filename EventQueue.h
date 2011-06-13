@@ -24,11 +24,7 @@ public:
             delete m_instance;
             m_instance = NULL;
         }
-    }
-
-    Uint32 size() {
-        return m_queue.size();
-    }
+    }    
 
     void enqueue(Event e);
     Event peek();

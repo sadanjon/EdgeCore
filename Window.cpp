@@ -180,7 +180,7 @@ Window::~Window(void) {
 }
 
 void Window::startSystemLoop() {    
-    MSG msg = { };
+    MSG msg = {};
     while (GetMessage(&msg, NULL, 0, 0)) {        
         TranslateMessage(&msg);
         DispatchMessage(&msg);        

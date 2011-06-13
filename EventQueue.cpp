@@ -16,7 +16,7 @@ EventQueue::~EventQueue() {
 void EventQueue::enqueue(Event e) {
     m_mutex.lock();
     
-    m_cvQueueIsNotEmpty.signal();
+    m_cvQueueIsNotEmpty.signalAll();
     m_queue.push_front(e);
 
     m_mutex.unlock();
@@ -43,22 +43,34 @@ Event EventQueue::dequeue() {
 
 
 // get next event
-bool getEvent(Event &e, bool block) {
-    static Mutex queueMutex;
-    static EventQueue *eq = EventQueue::getInstance();
-    queueMutex.lock();
-
-    if (block && eq->size() == 0) {        
-        eq->m_cvQueueIsNotEmpty.wait(queueMutex);                
-        e = eq->dequeue();   
-        return true;
-    } 
-
-    if (eq->size() == 0)
-        return false;
-    
-    e = eq->dequeue();   
-    return true;
+bool getEvent(Event &e, bool block) {    
+    static EventQueue *eq = EventQueue::getInstance();    
+    eq->m_mutex.lock();
+    if (block) {            
+        if (eq->m_queue.size() != 0) {            
+            e = eq->m_queue.back();
+            eq->m_queue.pop_back();
+            eq->m_mutex.unlock();
+            // (mutex unlocked from within dequeue)
+            return true;
+        } else {
+            eq->m_cvQueueIsNotEmpty.wait(eq->m_mutex);                
+            e = eq->m_queue.back();
+            eq->m_queue.pop_back();
+            eq->m_mutex.unlock();
+            return true;
+        }
+    } else { 
+        if (eq->m_queue.size() == 0) {
+            eq->m_mutex.unlock();
+            return false;
+        } else {
+            e = eq->m_queue.back();
+            eq->m_queue.pop_back();
+            eq->m_mutex.unlock();
+            return true;
+        }
+    }
 }
 
 } // namespace edge

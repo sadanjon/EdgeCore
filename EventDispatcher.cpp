@@ -23,7 +23,7 @@ void EventDispatcher::mouseKey(Key key, KeyState keyState) {
 }
 void EventDispatcher::mouseWheel(Sint32 delta) {
     m_mouseWheel += delta;
-    if (delta <= 120 || delta >= 120) {
+    if (delta <= -120 || delta >= 120) {
         Event e;
         e.type = ET_MOUSEKEY;
         e.mouse.key = K_WHEEL;
